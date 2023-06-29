@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Page HTML</title>
+</head>
+<body>
+    <h1>Titres des liens</h1>
+
+    <ul>
+        {% for sublist in data.values() %}
+            {% for item in sublist %}
+            <li>
+                <h2>{{ item['text'] }}</h2>
+                <a href="{{ item['attributes']['a']['href'] }}">{{ item['text'] }}</a>
+                <ul>
+                    {% for key, value in item.items() %}
+                        <li>{{ key }} : {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            </li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+    
+    
+</body>
+</html>

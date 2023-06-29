@@ -1,0 +1,32 @@
+base_url: https://www.avito.ma/fr/maroc/immobilier-%C3%A0_vendre?o={i}
+initial_state: goto_next_page
+states:
+  extract_data:
+    method: extract_data
+    next_state: send_data
+    parameters:
+      raw_data: '{previous_result}'
+      selectors:
+      - attrs:
+          class: sc-jejop8-0
+        name: div
+  goto_next_page:
+    method: goto_next_page
+    next_state: scrap_page
+    parameters:
+      base_url: https://www.avito.ma/fr/maroc/immobilier-%C3%A0_vendre?o={i}
+      next_page: 72
+  scrap_page:
+    method: scrap_page
+    next_state: extract_data
+    parameters:
+      by: XPATH
+      value: //*[@id="__next"]/div/main/div/div[6]/div[1]/div/div[2]
+  send_data:
+    method: send_data
+    next_state: goto_next_page
+    parameters:
+      address: http://127.0.0.1:5000/api/receive_dict
+      data: '{previous_result}'
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like
+  Gecko) Chrome/88.0.4324.150 Safari/537.36

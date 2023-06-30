@@ -1,4 +1,4 @@
-base_url: https://www.avito.ma/fr/maroc/immobilier-%C3%A0_vendre?o={i}
+base_url: https://wololo.net/page/{i}/
 initial_state: goto_next_page
 states:
   extract_data:
@@ -8,20 +8,20 @@ states:
       raw_data: '{previous_result}'
       selectors:
       - attrs:
-          class: sc-jejop8-0
-        name: div
+          class: post-title
+        name: h2
   goto_next_page:
     method: goto_next_page
     next_state: scrap_page
     parameters:
-      base_url: https://www.avito.ma/fr/maroc/immobilier-%C3%A0_vendre?o={i}
-      next_page: 76
+      base_url: https://wololo.net/page/{i}/
+      next_page: 196
   scrap_page:
     method: scrap_page
     next_state: extract_data
     parameters:
-      by: XPATH
-      value: //*[@id="__next"]/div/main/div/div[6]/div[1]/div/div[2]
+      by: CSS_SELECTOR
+      value: div.post-list.group
   send_data:
     method: send_data
     next_state: goto_next_page

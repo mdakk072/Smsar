@@ -74,6 +74,7 @@ La configuration du scraper est définie dans un fichier YAML. Ce fichier contie
 
 
 Et voici un exemple simplifié de fichier de configuration :
+![Image](https://raw.githubusercontent.com/mdakk072/Smsar/main/diagrams/FSM%20SCRAPPER%20YAML.svg)
 
 ```yaml
 base_url: https://www.example.com?page={i}
@@ -143,19 +144,19 @@ session = db_manager.get_session()
 ```
 
 ### **Méthodes**
-| Méthode | Description | Paramètres | Retour |
-| --- | --- | --- | --- |
-| `__init__(self, config_file)` | Initialise le scraper avec le fichier de configuration. | `config_file` : Chemin vers le fichier de configuration. | Aucun |
-| `init_driver(self)` | Initialise le web driver pour Selenium. | Aucun | Aucun |
-| `scrap_page(self, by_method, value)` | Scraper une page web. | `by_method` : Méthode de sélection des éléments à scraper (ex: XPATH, CSS Selector, etc.), `value` : Valeur utilisée avec la méthode de sélection pour identifier les éléments à scraper. | Le contenu HTML de la page, ou None si une erreur s'est produite. |
-| `extract_data(self, raw_data, selectors)` | Extraire des données spécifiques à partir des données brutes scrapées. | `raw_data` : Données brutes scrapées, `selectors` : Sélecteurs utilisés pour identifier les données à extraire. | Les données extraites, ou None si une erreur s'est produite. |
-| `extract_infos(self, extracted_data, data_to_find)` | Extraire des informations spécifiques à partir des données extraites. | `extracted_data` : Données extraites, `data_to_find` : Clés des informations à extraire. | Les données d'intérêt, ou None si une erreur s'est produite. |
-| `extract_attributes(self, element)` | Extraire les attributs d'un élément HTML. | `element` : Élément HTML dont les attributs doivent être extraits. | Les attributs extraits. |
-| `goto_next_page(self, base_url, next_page)` | Naviguer vers la page suivante d'un site web. | `base_url` : URL de base du site web, `next_page` : Numéro de la page suivante à visiter. | Aucun |
-| `goto_link(self, link)` | Naviguer vers un lien spécifique. | `link` : Lien vers lequel naviguer. | Aucun |
-| `call_api(self, api_url)` | Faire une requête GET à une API spécifique. | `api_url` : URL de l'API à appeler. | La réponse JSON de l'API. |
-| `send_data(self, data, address)` | Envoyer des données à une adresse spécifiée en utilisant une requête POST. | `data` : Les données à envoyer, `address` : L'adresse à laquelle envoyer les données. | Le code de statut de la réponse. |
-| `scrape_site(self, config=None)` | Scraper le site web en utilisant les états et les paramètres spécifiés dans le fichier de configuration. | `config` : Configuration optionnelle à utiliser pour le scraping. Si aucune n'est fournie, utilise la configuration du fichier de configuration. | Aucun |
+| Méthode | Description |
+| --- | --- |
+| `__init__(self, config_file)` | Initialise le scraper avec le fichier de configuration spécifié. |
+| `init_driver(self)` | Initialise le pilote web pour Selenium. |
+| `scrap_page(self, by_method, value)` | Récupère le contenu de la page en utilisant la méthode et la valeur spécifiées. |
+| `extract_data(self, raw_data, selectors)` | Extrait les données du HTML brut en utilisant les sélecteurs fournis. |
+| `extract_infos(self, extracted_data, data_to_find)` | Extrait les informations d'intérêt à partir des données extraites en utilisant les clés spécifiées dans `data_to_find`. |
+| `extract_attributes(self, element)` | Extrait les attributs de l'élément HTML donné. |
+| `goto_next_page(self, base_url, next_page)` | Va à la page suivante en utilisant l'URL de base et le numéro de la page suivante. |
+| `goto_link(self, link)` | Va au lien spécifié. |
+| `call_api(self, api_url)` | Fait une requête GET à l'URL de l'API spécifiée. |
+| `send_data(self, data, address)` | Envoie des données à l'adresse spécifiée en utilisant une requête POST. |
+| `scrape_site(self, config=None)` | Récupère le site web en utilisant les états et les paramètres spécifiés dans le fichier de configuration. |
 
 
 ### **Configuration**
@@ -229,8 +230,7 @@ Dans cet exemple, deux tables sont définies : `table1` et `table2`. `table1` a 
 ### **Structure de la base de données**
 
 La base de données comprend les tables suivantes :
-
-![Image](https://raw.githubusercontent.com/mdakk072/Smsar/main/InRvPW2z.svg)
+![Image](https://raw.githubusercontent.com/mdakk072/Smsar/main/diagrams/shema%20DB.svg)
 
 | Nom de la Table | Attributs |
 | --- | --- |

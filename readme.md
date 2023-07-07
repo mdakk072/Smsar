@@ -6,8 +6,7 @@
 Ce projet vise à développer une application web qui fournit des statistiques et des informations sur le marché immobilier. L'application recueille des informations sur différentes annonces immobilières et les présente sous forme de statistiques. En outre, l'application offre des informations sur les quartiers des villes, y compris les établissements locaux et les articles de presse pertinents.
 
 # Sections du Projet
-![Image](https://raw.githubusercontent.com/mdakk072/Smsar/main/MKWxjCtB.svg
-)
+![Image](https://raw.githubusercontent.com/mdakk072/Smsar/main/diagrams/projet%20shema.svg)
 
 
 ## Web Scrapping
@@ -228,7 +227,6 @@ Dans cet exemple, deux tables sont définies : `table1` et `table2`. `table1` a 
 
 
 ### **Structure de la base de données**
-
 La base de données comprend les tables suivantes :
 ![Image](https://raw.githubusercontent.com/mdakk072/Smsar/main/diagrams/shema%20DB.svg)
 

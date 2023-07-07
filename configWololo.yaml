@@ -15,12 +15,12 @@ states:
     next_state: scrap_page
     parameters:
       base_url: https://wololo.net/page/{i}/
-      next_page: 196
+      next_page: 279
   scrap_page:
     method: scrap_page
     next_state: extract_data
     parameters:
-      by: CSS_SELECTOR
+      by_method: CSS_SELECTOR
       value: div.post-list.group
   send_data:
     method: send_data

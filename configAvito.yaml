@@ -3,24 +3,68 @@ initial_state: goto_next_page
 states:
   extract_data:
     method: extract_data
-    next_state: send_data
+    next_state: extract_infos
     parameters:
       raw_data: '{previous_result}'
       selectors:
       - attrs:
           class: sc-jejop8-0
         name: div
+  extract_infos:
+    method: extract_infos
+    next_state: send_data
+    parameters:
+      data_to_find:
+        city:
+          attribute: //div[@class="sc-jejop8-14 fcoIgW"]/div[2]/span
+          extract: text
+          type: xpath
+        date_published:
+          attribute: //div[@class="sc-jejop8-14 fcoIgW"]/div[1]/span
+          extract: text
+          type: xpath
+        description:
+          attribute: //span[@class="sc-jejop8-20 gsYzZU"]
+          extract: text
+          type: xpath
+        image_url:
+          attribute: //div[@class="sc-jejop8-3 ljQJhB"]/img
+          attribute_name: src
+          extract: attribute
+          type: xpath
+        number_of_images:
+          attribute: //span[@class="sc-1x0vz2r-0 vEfXB"]
+          extract: text
+          type: xpath
+        price:
+          attribute: //span[@class="sc-1x0vz2r-0 bpfcIG sc-jejop8-18 dfevBq"]
+          extract: text
+          type: xpath
+        property_type:
+          attribute: //p[@class="sc-1x0vz2r-0 hfbzFD sc-jejop8-21 iUmQdJ"]
+          extract: text
+          type: xpath
+        quartier:
+          attribute: //div[@class="sc-jejop8-14 fcoIgW"]/div[2]/span
+          extract: text
+          type: xpath
+        url_ad:
+          attribute: //a[@class="sc-jejop8-1 cYNgZe"]
+          attribute_name: href
+          extract: attribute
+          type: xpath
+      extracted_data: '{previous_result}'
   goto_next_page:
     method: goto_next_page
     next_state: scrap_page
     parameters:
       base_url: https://www.avito.ma/fr/maroc/immobilier-%C3%A0_vendre?o={i}
-      next_page: 76
+      next_page: 15
   scrap_page:
     method: scrap_page
     next_state: extract_data
     parameters:
-      by: XPATH
+      by_method: XPATH
       value: //*[@id="__next"]/div/main/div/div[6]/div[1]/div/div[2]
   send_data:
     method: send_data

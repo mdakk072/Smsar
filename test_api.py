@@ -12,6 +12,8 @@ def send_dict():
 @app.route('/api/receive_dict', methods=['POST'])
 def receive_dict():
     data = request.get_json()  # Get the JSON data from the request
+    with open('data.json', 'w') as f:
+        json.dump(data, f)
     if not isinstance(data, dict):
         return jsonify({'error': 'Invalid data format. Expecting a dictionary.'}), 400
 

@@ -2,26 +2,39 @@
 <html>
 <head>
     <title>Page HTML</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
 </head>
 <body>
-    <h1>Titres des liens</h1>
-
-    <ul>
-        {% for sublist in data.values() %}
-            {% for item in sublist %}
-            <li>
-                <h2>{{ item['text'] }}</h2>
-                <a href="{{ item['attributes']['a']['href'] }}">{{ item['text'] }}</a>
-                <ul>
-                    {% for key, value in item.items() %}
-                        <li>{{ key }} : {{ value }}</li>
-                    {% endfor %}
-                </ul>
-            </li>
+    <h1 class="text-center my-4">Titres des liens</h1>
+    <div class="container">
+        {% for key, values in data.items() %}
+            {% for value in values %}
+            <div class="card mb-3">
+                <div class="row g-0">
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h2 class="card-title">{{ value['property_type'] }}</h2>
+                            <p class="card-text"><b>City:</b> {{ value['city'] }}</p>
+                            <p class="card-text"><b>Date Published:</b> {{ value['date_published'] }}</p>
+                            <p class="card-text"><b>Description:</b> {{ value['description'] }}</p>
+                            <p class="card-text"><b>Number of Images:</b> {{ value['number_of_images'] }}</p>
+                            <p class="card-text"><b>Price:</b> {{ value['price'] }}</p>
+                            <p class="card-text"><b>Quartier:</b> {{ value['quartier'] }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="{{ value['image_url'] }}" alt="Property Image" class="img-fluid rounded-start">
+                    </div>
+                </div>
+            </div>
+            
+                    <div class="card-footer">
+                        <a href="{{ value['url_ad'] }}" class="btn btn-primary">Click Here to View Ad</a>
+                    </div>
+                </div>
             {% endfor %}
         {% endfor %}
-    </ul>
-    
-    
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 </body>
 </html>

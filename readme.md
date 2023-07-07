@@ -21,113 +21,99 @@ Cependant, il est important de noter que notre module de web scrapping est conç
 En outre, notre module de web scrapping est également capable de scraper les API d'information. Par exemple, nous pourrions utiliser l'API de Google Places pour obtenir des informations sur les établissements locaux dans un quartier spécifique, ou l'API de Twitter pour recueillir des tweets relatifs à l'immobilier. Ces API peuvent nous fournir des informations supplémentaires qui peuvent être pertinentes pour notre analyse, comme les tendances du marché, les nouvelles de l'industrie, et les commentaires des utilisateurs sur les propriétés spécifiques.
 
 
-Ce module fournit un outil de web scraping flexible et configurable construit avec Python. Il utilise Selenium pour l'automatisation du navigateur et BeautifulSoup pour l'analyse du HTML. Le module est conçu autour du concept de machine à états, permettant de définir une séquence d'actions à effectuer pendant le processus de scraping.
+### **Description**
 
-### Caractéristiques
+Le module de web scrapping est implémenté en utilisant les bibliothèques Selenium, BeautifulSoup et Requests. Il est capable de scraper les sites web en fonction d'une configuration fournie.
 
-- **Configuration flexible** : Le module utilise un fichier de configuration JSON pour définir la séquence d'actions (états) à effectuer pendant le processus de scraping. Chaque état est mappé à une méthode de la classe `Scraper` et les paramètres de cette méthode.
+### **Dépendances**
 
-- **Automatisation du navigateur** : Le module utilise Selenium pour automatiser un navigateur web. Cela permet au module d'interagir avec des sites web basés sur JavaScript et d'effectuer des actions telles que cliquer sur des boutons ou naviguer vers différentes pages.
+- Selenium
+- BeautifulSoup
+- Requests
 
-- **Analyse HTML** : Le module utilise BeautifulSoup pour analyser le contenu HTML des pages web et extraire des données.
+### **Exemple d'utilisation**
 
-- **Concept de machine à états** : Le module est conçu autour du concept de machine à états. Cela vous permet de définir une séquence d'actions à effectuer pendant le processus de scraping. La séquence d'actions peut être facilement modifiée en changeant le fichier de configuration.
+```python
+scraper = Scraper('config.yaml')
+scraper.scrape_site()
+```
 
-### Utilisation
+### **Méthodes**
+| Méthode | Description | Paramètres | Retour |
+| --- | --- | --- | --- |
+| `__init__(self, config_file)` | Initialise le scraper avec le fichier de configuration. | `config_file` : Chemin vers le fichier de configuration. | Aucun |
+| `init_driver(self)` | Initialise le web driver pour Selenium. | Aucun | Aucun |
+| `scrap_page(self, by_method, value)` | Scraper une page web. | `by_method` : Méthode de sélection des éléments à scraper (ex: XPATH, CSS Selector, etc.), `value` : Valeur utilisée avec la méthode de sélection pour identifier les éléments à scraper. | Objet contenant les données scrapées de la page. |
+| `extract_data(self, raw_data, selectors)` | Extraire des données spécifiques à partir des données brutes scrapées. | `raw_data` : Données brutes scrapées, `selectors` : Sélecteurs utilisés pour identifier les données à extraire. | Objet contenant les données extraites. |
+| `extract_infos(self, extracted_data, data_to_find)` | Extraire des informations spécifiques à partir des données extraites. | `extracted_data` : Données extraites, `data_to_find` : Clés des informations à extraire. | Objet contenant les informations extraites. |
+| `extract_attributes(self, element)` | Extraire les attributs d'un élément HTML. | `element` : Élément HTML dont les attributs doivent être extraits. | Objet contenant les attributs de l'élément. |
+| `goto_next_page(self, base_url, next_page)` | Naviguer vers la page suivante d'un site web. | `base_url` : URL de base du site web, `next_page` : Numéro de la page suivante à visiter. | Objet contenant les données scrapées de la page suivante. |
+| `goto_link(self, link)` | Naviguer vers un lien spécifique. | `link` : Lien vers lequel naviguer. | Objet contenant les données scrapées du lien. |
+| `call_api(self, api_url)` | Faire une requête GET à une API spécifique. | `api_url` : URL de l'API à appeler. | Objet contenant les données renvoyées par l'API. |
 
-Pour utiliser le module, vous devez créer un fichier de configuration JSON qui définit la séquence d'actions à effectuer pendant le processus de scraping. Chaque action est représentée par un état dans la machine à états. Le fichier de configuration doit définir l'état initial et une correspondance des états aux méthodes de la classe `Scraper` et leurs paramètres.
-
-Voici un exemple de fichier de configuration :
 
 
-![Image](https://raw.githubusercontent.com/mdakk072/Smsar/main/Y94WWF2q.svg)
+### **Configuration**
+
+La configuration du scraper est définie dans un fichier YAML. Ce fichier contient des informations sur les états et les paramètres du scraper. Voici une explication des attributs de configuration :
+
+| Attribut | Description |
+| --- | --- |
+| `base_url` | L'URL de base du site à scraper. |
+| `initial_state` | L'état initial du scraper. |
+| `states` | Les différents états que le scraper peut avoir. Chaque état a une méthode associée et des paramètres. |
+| `states.[state_name].method` | La méthode à exécuter dans cet état. |
+| `states.[state_name].next_state` | L'état suivant après l'exécution de la méthode actuelle. |
+| `states.[state_name].parameters` | Les paramètres nécessaires pour exécuter la méthode. |
+| `states.[state_name].parameters.[parameter_name]` | Un paramètre spécifique nécessaire pour exécuter la méthode. |
+| `states.[state_name].parameters.[parameter_name].attribute` | L'attribut à extraire pour le paramètre spécifique. |
+| `states.[state_name].parameters.[parameter_name].extract` | Comment extraire l'attribut (par exemple, texte, attribut). |
+| `states.[state_name].parameters.[parameter_name].type` | Le type d'élément à partir duquel extraire l'attribut (par exemple, xpath). |
+| `states.[state_name].parameters.[parameter_name].attribute_name` | Le nom de l'attribut à extraire si `extract` est défini sur `attribute`. |
+| `userAgent` | L'agent utilisateur à utiliser pour les requêtes web. |
 
 
-```json
-{
-    "userAgent": "Votre User Agent",
-    "base_url": "https://www.example.com/page1",
-    "data_endpoint": "https://api.example.com/data",
-    "initial_state": "scrap_page",
-    "states": {
-        "scrap_page": {
-            "method": "scrap_page",
-            "parameters": ["By.CSS_SELECTOR", ".listing"],
-            "next_state": "extract_data"
-        },
-        "extract_data": {
-            "method": "extract_data",
-            "parameters": ["raw_data", "div", "sc-jejop8-0"],
-            "next_state": "goto_next_page"
-        },
-         "call_api": {
-            "method": "call_api",
-            "parameters": ["api_url"],
-            "next_state": "send_data"
-        },
-        "send_data": {
-            "method": "send_data",
-            "parameters": ["data"],
-            "next_state": null
-        },
-        
-        "goto_next_page": {
-            "method": "goto_next_page",
-            "parameters": [],
-            "next_state": "check_page"
-        },
-        "check_page": {
-            "method": "check_page",
-            "parameters": [],
-            "condition": "page_not_404",
-            "state_true": "scrap_page",
-            "state_false": "end"
-        },
-        "goto_link": {
-            "method": "goto_link",
-            "parameters": ["link"],
-            "next_state": "scrap_page"
-        },
-       
-        "end": {
-            "method": "end",
-            "parameters": [],
-            "next_state": null
-        }
-    }
-}
+Et voici un exemple simplifié de fichier de configuration :
+
+```yaml
+base_url: https://www.example.com?page={i}
+initial_state: goto_next_page
+states:
+  goto_next_page:
+    method: goto_next_page
+    next_state: scrap_page
+    parameters:
+      base_url: https://www.example.com?page={i}
+      next_page: 1
+  scrap_page:
+    method: scrap_page
+    next_state: extract_data
+    parameters:
+      by_method: xpath
+      value: //div[@class="content"]
+  extract_data:
+    method: extract_data
+    next_state: send_data
+    parameters:
+      raw_data: '{previous_result}'
+      selectors:
+      - attrs:
+          class: item
+        name: div
+  send_data:
+    method: send_data
+    next_state: goto_next_page
+    parameters:
+      address: http://localhost:5000/api/receive_data
+      data: '{previous_result}'
+userAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36
 
 ```
-| Attribut/Méthode | Type | Description |
-| --- | --- | --- |
-| `config` | Attribut | Un dictionnaire contenant la configuration du scraper. |
-| `driver` | Attribut | Un objet WebDriver de Selenium utilisé pour automatiser le navigateur. |
-| `__init__(self, config)` | Méthode | Le constructeur de la classe. Il initialise les attributs `config` et `driver`. |
-| `init_driver(self)` | Méthode | Initialise le WebDriver de Selenium avec les options appropriées. |
-| `scrap_page(self)` | Méthode | Scraper le contenu d'une page web en utilisant le sélecteur CSS fourni dans la configuration. |
-| `extract_data(self, raw_data)` | Méthode | Extraire les données de la page web scrapée en utilisant BeautifulSoup. |
-| `goto_next_page(self)` | Méthode | Naviguer vers la page suivante en utilisant l'URL fournie dans la configuration. |
-| `goto_link(self, link)` | Méthode | Naviguer vers un lien spécifique. |
-| `call_api(self, api_url)` | Méthode | Appeler une API spécifique et retourner la réponse. |
-| `send_data(self, data)` | Méthode | Envoyer les données extraites à un endpoint spécifique en utilisant une requête POST. |
-| `scrape_site(self, config)` | Méthode | Commencer le processus de scraping en utilisant la configuration fournie. |
 
-Voici une liste des dépendances principales et une brève explication de leur utilisation :
-
-- **Requests** : Cette bibliothèque est utilisée pour envoyer des requêtes HTTP. Elle est principalement utilisée pour interagir avec les API, par exemple pour envoyer les données extraites à un endpoint spécifique.
-
-- **JSON** : Cette bibliothèque est utilisée pour manipuler les données JSON. Elle est utilisée pour convertir les données extraites en format JSON avant de les envoyer à un endpoint.
-
-- **Time** : Cette bibliothèque est utilisée pour introduire des délais dans le script, par exemple pour attendre que la page web soit chargée ou pour simuler le comportement d'un utilisateur humain.
-
-- **Random** : Cette bibliothèque est utilisée pour générer des nombres aléatoires, par exemple pour introduire des délais aléatoires entre les requêtes afin de simuler le comportement d'un utilisateur humain et d'éviter d'être bloqué par les sites web.
-
-- **Datetime** : Cette bibliothèque est utilisée pour manipuler les dates et les heures, par exemple pour enregistrer le moment où les données ont été extraites.
-
-- **BeautifulSoup** : Cette bibliothèque est utilisée pour analyser le contenu HTML des pages web et extraire des données. Elle permet de naviguer dans la structure de la page et de trouver les éléments en fonction de leurs balises, classes, id, etc.
-
-- **Selenium** : Cette bibliothèque est utilisée pour automatiser un navigateur web. Elle permet d'interagir avec des sites web basés sur JavaScript et d'effectuer des actions telles que cliquer sur des boutons ou naviguer vers différentes pages.
-
+### **Changements futurs prévus**
+- Amélioration de la gestion des erreurs lors du scraping.
+- Ajout de la prise en charge d'autres types d'API d'information.
+- Optimisation de la vitesse de scraping.
 
 ## Analyse des Données
 
@@ -136,7 +122,114 @@ Les données recueillies sont analysées pour produire des statistiques sur le m
 AD
 
 ## Base de Données 
-La base de données est utilisée pour stocker les informations recueillies et les résultats de l'analyse des données. La base de données comprend les tables suivantes : 
+
+La base de données est utilisée pour stocker les informations recueillies et les résultats de l'analyse des données. Le module de base de données est responsable de la gestion des opérations de base de données en fonction d'une configuration fournie. Il utilise SQLAlchemy pour interagir avec la base de données.
+
+### **Comment ça fonctionne**
+
+La classe `DatabaseManager` est initialisée avec un fichier de configuration. Ce fichier de configuration contient des informations sur la base de données telles que le nom, l'identifiant, le mot de passe, l'hôte et le port. Il contient également des informations sur le moteur SQLAlchemy et les configurations de mise en commun.
+
+Une fois initialisé, le `DatabaseManager` configure le moteur SQLAlchemy et crée une base déclarative. Il crée ensuite dynamiquement une classe pour chaque table définie dans le fichier de configuration et crée toutes les tables dans le moteur.
+
+Le `DatabaseManager` fournit des méthodes pour créer une nouvelle session, ajouter un nouvel enregistrement à une table, mettre à jour un enregistrement existant dans une table, supprimer un enregistrement d'une table, récupérer un enregistrement d'une table et rechercher des enregistrements dans une table.
+
+### **Exemple de code**
+
+Voici un exemple d'utilisation du `DatabaseManager` :
+
+```python
+db_manager = DatabaseManager('configDB.yaml')
+session = db_manager.get_session()
+```
+
+### **Méthodes**
+| Méthode | Description | Paramètres | Retour |
+| --- | --- | --- | --- |
+| `__init__(self, config_file)` | Initialise le scraper avec le fichier de configuration. | `config_file` : Chemin vers le fichier de configuration. | Aucun |
+| `init_driver(self)` | Initialise le web driver pour Selenium. | Aucun | Aucun |
+| `scrap_page(self, by_method, value)` | Scraper une page web. | `by_method` : Méthode de sélection des éléments à scraper (ex: XPATH, CSS Selector, etc.), `value` : Valeur utilisée avec la méthode de sélection pour identifier les éléments à scraper. | Le contenu HTML de la page, ou None si une erreur s'est produite. |
+| `extract_data(self, raw_data, selectors)` | Extraire des données spécifiques à partir des données brutes scrapées. | `raw_data` : Données brutes scrapées, `selectors` : Sélecteurs utilisés pour identifier les données à extraire. | Les données extraites, ou None si une erreur s'est produite. |
+| `extract_infos(self, extracted_data, data_to_find)` | Extraire des informations spécifiques à partir des données extraites. | `extracted_data` : Données extraites, `data_to_find` : Clés des informations à extraire. | Les données d'intérêt, ou None si une erreur s'est produite. |
+| `extract_attributes(self, element)` | Extraire les attributs d'un élément HTML. | `element` : Élément HTML dont les attributs doivent être extraits. | Les attributs extraits. |
+| `goto_next_page(self, base_url, next_page)` | Naviguer vers la page suivante d'un site web. | `base_url` : URL de base du site web, `next_page` : Numéro de la page suivante à visiter. | Aucun |
+| `goto_link(self, link)` | Naviguer vers un lien spécifique. | `link` : Lien vers lequel naviguer. | Aucun |
+| `call_api(self, api_url)` | Faire une requête GET à une API spécifique. | `api_url` : URL de l'API à appeler. | La réponse JSON de l'API. |
+| `send_data(self, data, address)` | Envoyer des données à une adresse spécifiée en utilisant une requête POST. | `data` : Les données à envoyer, `address` : L'adresse à laquelle envoyer les données. | Le code de statut de la réponse. |
+| `scrape_site(self, config=None)` | Scraper le site web en utilisant les états et les paramètres spécifiés dans le fichier de configuration. | `config` : Configuration optionnelle à utiliser pour le scraping. Si aucune n'est fournie, utilise la configuration du fichier de configuration. | Aucun |
+
+
+### **Configuration**
+
+Le `DatabaseManager` utilise un fichier de configuration YAML. Voici un exemple de fichier de configuration :
+
+```yaml
+database:
+  name: 'mydb'
+  username: 'user'
+  password: 'password'
+  host: 'localhost'
+  port: 5432
+
+sqlalchemy:
+  echo: false
+  track_modifications: false
+
+pooling:
+  max_overflow: 10
+  pool_size: 5
+  pool_timeout: 30
+  pool_recycle: 3600
+
+tables:
+  - name: 'table1'
+    columns:
+      - name: 'ID'
+        type: 'Integer'
+        primary_key: true
+      - name: 'column1'
+        type: 'String'
+  - name: 'table2'
+    columns:
+      - name: 'ID'
+        type: 'Integer'
+        primary_key: true
+      - name: 'column1'
+        type: 'String'
+      - name: 'column2'
+        type: 'Integer'
+        foreign_key: 'table1.ID'
+```
+Dans cet exemple, deux tables sont définies : `table1` et `table2`. `table1` a deux colonnes : `ID` (clé primaire) et `column1`. `table2` a trois colonnes : `ID` (clé primaire), `column1` et `column2` (clé étrangère vers `table1.ID`).
+| Clé | Description |
+| --- | --- |
+| `database:name` | Le nom de la base de données. |
+| `database:username` | Le nom d'utilisateur pour se connecter à la base de données. |
+| `database:password` | Le mot de passe pour se connecter à la base de données. |
+| `database:host` | L'hôte où se trouve la base de données. |
+| `database:port` | Le port pour se connecter à la base de données. |
+| `database:sslmode` | Le mode SSL pour la connexion à la base de données. |
+| `database:drivername` | Le nom du driver de la base de données à utiliser. |
+| `sqlalchemy:echo` | Si `true`, SQLAlchemy affiche les requêtes SQL brutes. |
+| `sqlalchemy:track_modifications` | Si `false`, SQLAlchemy ne suit pas les modifications des objets. |
+| `sqlalchemy:pool_pre_ping` | Si `true`, SQLAlchemy effectuera un "ping" à la base de données avant chaque connexion pour vérifier si la connexion est toujours valide. |
+| `pooling:max_overflow` | Le nombre maximum de connexions à créer au-delà de la taille du pool. |
+| `pooling:pool_size` | La taille du pool de connexions à maintenir. |
+| `pooling:pool_timeout` | Le nombre de secondes à attendre avant d'abandonner le retour d'une connexion au pool. |
+| `pooling:pool_recycle` | Le nombre de secondes après lequel une connexion est automatiquement recyclée. |
+| `pooling:pool_reset_on_return` | Détermine ce qui se passe lorsqu'une connexion est retournée au pool. Les options possibles sont `rollback`, `commit` ou `none`. |
+| `tables` | Une liste de tables à créer dans la base de données. Chaque table est un dictionnaire avec les clés `name` (le nom de la table) et `columns` (une liste de colonnes). |
+| `tables:name` | Le nom de la table. |
+| `tables:columns` | Une liste de colonnes pour la table. Chaque colonne est un dictionnaire avec les clés `name` (le nom de la colonne), `type` (le type de la colonne), `primary_key` (si `true`, la colonne est une clé primaire), `foreign_key` (si présent, la colonne est une clé étrangère vers la colonne spécifiée), `index` (si `true`, un index est créé pour la colonne), `unique` (si `true`, la colonne est définie comme unique), `nullable` (si `true`, la colonne peut avoir des valeurs nulles), et `default` (la valeur par défaut de la colonne). |
+| `tables:foreign_keys` | Une liste de clés étrangères pour la table. Chaque clé étrangère est un dictionnaire avec les clés `name` (le nom de la clé étrangère), `references` (la table et la colonne que la clé étrangère référence) et `ondelete` (l'action à effectuer lorsque la ligne référencée est supprimée). |
+| `tables:indices` | Une liste d'indices à créer pour la table. Chaque indice est un dictionnaire avec les clés `name` (le nom de l'indice) et `columns` (les colonnes à inclure dans l'indice). |
+| `tables:uniques` | Une liste de contraintes d'unicité à créer pour la table. Chaque contrainte est un dictionnaire avec les clés `name` (le nom de la contrainte) et `columns` (les colonnes à inclure dans la contrainte). |
+| `tables:checks` | Une liste de contraintes de vérification à créer pour la table. Chaque contrainte est un dictionnaire avec les clés `name` (le nom de la contrainte) et `condition` (la condition de la contrainte). |
+
+
+### **Structure de la base de données**
+
+La base de données comprend les tables suivantes :
+
 ![Image](https://raw.githubusercontent.com/mdakk072/Smsar/main/InRvPW2z.svg)
 
 | Nom de la Table | Attributs |

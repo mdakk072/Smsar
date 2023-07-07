@@ -29,23 +29,24 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
-
+from lxml import html
+import  lxml.etree. import tostring
 class Scraper:
     """A web scraper class."""
 
-    def __init__(self, configFile):
+    def __init__(self, config_file):
         """
         Initialize the scraper.
 
         Args:
-            configFile (str): Path to the configuration file.
+            config_file (str): Path to the configuration file.
         """
-        self.configFileName = configFile
+        self.config_filename = config_file
         print("> Scraper Initialized")
         print("-------------------")
-        print(f"Configuration File: {configFile}")
-        with open(configFile, 'r') as f:
-            config = yaml.safe_load(f)
+        print(f"Configuration File: {config_file}")
+        with open(config_file, 'r',encoding='utf-8') as file:
+            config = yaml.safe_load(file)
         self.config = config
         self.driver = None
         print("\nSteps and Parameters:")
@@ -78,7 +79,7 @@ class Scraper:
         self.driver.delete_all_cookies()
         time.sleep(1.5)
 
-    def scrap_page(self, by, value):
+    def scrap_page(self, by_method, value):
         """
         Scrape the page using the given method and value.
 
@@ -90,9 +91,9 @@ class Scraper:
             str: The HTML content of the page, or None if an error occurred.
         """
         try:
-            by_method = getattr(By, by)
-            bodyLocator = (By.TAG_NAME, 'body')
-            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(bodyLocator))
+            by_method = getattr(By, by_method)
+            body_locator = (By.TAG_NAME, 'body')
+            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(body_locator))
             page_content = self.driver.find_element(by_method, value)
             page_html = page_content.get_attribute('outerHTML')
             return page_html
@@ -100,12 +101,14 @@ class Scraper:
             print("TimeoutException: Timed out waiting for element to be present.")
             return None
         except NoSuchElementException:
-            print(f"No such element found with {by} '{value}'.")
+            print(f"No such element found with {by_method} '{value}'.")
             return None
-        except Exception as e:
-            print(f"An error occurred during scraping: {str(e)}")
+        except AttributeError:
+            print(f"AttributeError: The attribute {by_method} does not exist.")
             return None
-
+        except Exception as error:
+            print(f"An error occurred during scraping: {str(error)}")
+            return None
     def extract_data(self, raw_data, selectors):
         """
         Extract data from the raw HTML using the provided selectors.
@@ -119,8 +122,8 @@ class Scraper:
         """
         extracted_data = {}
         try:
-            with open('raw_data.html', 'wb') as f:
-                f.write(raw_data.encode('utf-8'))
+            with open('raw_data.html', 'wb') as file:
+                file.write(raw_data.encode('utf-8'))
             soup = BeautifulSoup(raw_data, 'html.parser')
             for ida, selector in enumerate(selectors):
                 print(f"Extracting data with selector: {selector}")
@@ -142,10 +145,67 @@ class Scraper:
         except NoSuchElementException:
             print(f"No such element found with selector: {selector}.")
             return None
-        except Exception as e:
-            print(f"An error occurred during data extraction: {str(e)}")
+        except Exception as error:
+            print(f"An error occurred during data extraction: {str(error)}")
             return None
         return extracted_data
+
+    def extract_infos(self, extracted_data, data_to_find):
+        """
+        Extract the information of interest from the extracted_data 
+        using the keys specified in data_to_find.
+
+        Args:
+            extracted_data (dict): 
+            data_to_find (dict): 
+
+        Returns:
+            dict: The data of interest, or None if an error occurred.
+        """
+        output_data={}
+        for data_samples in extracted_data:
+            output_data[data_samples]=[]
+            for sample in extracted_data[data_samples]:
+                infos={}
+                for key, value in data_to_find.items():
+                    if value['type'] == 'html':
+                        # Add HTML extraction logic here
+                        pass
+                    elif value['type'] == 'xpath':
+                        tree = html.fromstring(sample['raw'])
+                        elements = tree.xpath(value['attribute'])
+                        info=None
+                        if not elements:
+                            print(f"No elements found with XPath: {value['attribute']}")
+                            infos[key]= info
+                            continue
+                        element = elements[0]
+                        if value.get('extract') == 'text':
+                            info = element.text_content()
+                        elif value.get('extract') == 'attribute':
+                            attribute_name = value.get('attribute_name')
+                            if not attribute_name:
+                                print("No attribute name specified for XPath attribute extraction.")
+                                infos[key]= info
+                                continue
+                            info = element.get(attribute_name)
+                        elif value.get('extract') == 'element':
+                            print(value['extract'])
+                            info = tostring(element)
+                        else:
+                            print(f"Invalid extract type: {value.get('extract')}")
+                            infos[key]= info
+                            continue
+                        infos[key]= info
+
+                    elif value['type'] == 'text':
+                        # Add regex extraction logic here
+                        pass
+                    elif value['type'] == 'attribute':
+                        # Add attribute extraction logic here
+                        pass
+                output_data[data_samples].append(infos)
+        return output_data
 
     def extract_attributes(self, element):
         """
@@ -180,8 +240,8 @@ class Scraper:
 
         # Save the updated value of next_page back to the YAML configuration file
         self.config['states']['goto_next_page']['parameters']['next_page'] = next_page
-        with open(self.configFileName, 'w') as f:
-            yaml.safe_dump(self.config, f)
+        with open(self.config_filename, 'w',encoding='utf-8') as file:
+            yaml.safe_dump(self.config, file)
 
         self.driver.get(next_page_url)
         time.sleep(5)
@@ -206,7 +266,7 @@ class Scraper:
         Returns:
             dict: The JSON response.
         """
-        response = requests.get(api_url)
+        response = requests.get(api_url,timeout=5)
         return response.json()
 
     def send_data(self, data, address):
@@ -221,7 +281,7 @@ class Scraper:
             int: The status code of the response.
         """
         headers = {'Content-Type': 'application/json'}
-        response = requests.post(address, data=json.dumps(data), headers=headers)
+        response = requests.post(address, data=json.dumps(data), headers=headers, timeout=5)
 
         print(response.status_code)
         print(response.text)
@@ -241,6 +301,7 @@ class Scraper:
         config = self.config if not config else config
         # Get the initial state
         state = config['initial_state']
+        previous_result = None
         while state is not None:
             step = config['states'][state]
             print("******************************")
@@ -272,6 +333,6 @@ class Scraper:
             # Update the previous result for next iteration
             previous_result = result
 
-#scraper = Scraper('configWololo.yaml')
-scraper = Scraper('configAvito.yaml')
+scraper = Scraper('configWololo.yaml')
+#scraper = Scraper('configAvito.yaml')
 scraper.scrape_site()

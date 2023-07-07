@@ -143,19 +143,19 @@ session = db_manager.get_session()
 ```
 
 ### **Méthodes**
-| Méthode | Description |
-| --- | --- |
-| `__init__(self, config_file)` | Initialise le scraper avec le fichier de configuration spécifié. |
-| `init_driver(self)` | Initialise le pilote web pour Selenium. |
-| `scrap_page(self, by_method, value)` | Récupère le contenu de la page en utilisant la méthode et la valeur spécifiées. |
-| `extract_data(self, raw_data, selectors)` | Extrait les données du HTML brut en utilisant les sélecteurs fournis. |
-| `extract_infos(self, extracted_data, data_to_find)` | Extrait les informations d'intérêt à partir des données extraites en utilisant les clés spécifiées dans `data_to_find`. |
-| `extract_attributes(self, element)` | Extrait les attributs de l'élément HTML donné. |
-| `goto_next_page(self, base_url, next_page)` | Va à la page suivante en utilisant l'URL de base et le numéro de la page suivante. |
-| `goto_link(self, link)` | Va au lien spécifié. |
-| `call_api(self, api_url)` | Fait une requête GET à l'URL de l'API spécifiée. |
-| `send_data(self, data, address)` | Envoie des données à l'adresse spécifiée en utilisant une requête POST. |
-| `scrape_site(self, config=None)` | Récupère le site web en utilisant les états et les paramètres spécifiés dans le fichier de configuration. |
+| Méthode | Description | Paramètres | Retour |
+| --- | --- | --- | --- |
+| `__init__(self, config_file)` | Initialise le gestionnaire de base de données avec un fichier de configuration. | `config_file`: Chemin vers le fichier de configuration. | Aucun. |
+| `_configure_engine(self)` | Configure le moteur SQLAlchemy. | Aucun. | Une instance de `sqlalchemy.engine.Engine`. |
+| `_create_tables(self)` | Crée dynamiquement une classe pour chaque table et crée toutes les tables dans le moteur. | Aucun. | Aucun. |
+| `_get_column_type(self, column)` | Renvoie le type SQLAlchemy correspondant au type de colonne spécifié. | `column`: Un dictionnaire représentant une colonne. | Une classe SQLAlchemy correspondant au type de la colonne. |
+| `get_session(self)` | Crée une nouvelle session SQLAlchemy. | Aucun. | Une nouvelle session SQLAlchemy. |
+| `add_record(self, table_class, **kwargs)` | Ajoute un nouvel enregistrement à une table. | `table_class`: La classe de la table à laquelle ajouter un enregistrement. `**kwargs`: Les valeurs des attributs de l'enregistrement. | Aucun. |
+| `update_record(self, table_class, record_id, **kwargs)` | Met à jour un enregistrement existant dans une table. | `table_class`: La classe de la table contenant l'enregistrement. `record_id`: L'ID de l'enregistrement à mettre à jour. `**kwargs`: Les nouvelles valeurs des attributs de l'enregistrement. | Aucun. |
+| `delete_record(self, table_class, record_id)` | Supprime un enregistrement d'une table. | `table_class`: La classe de la table contenant l'enregistrement. `record_id`: L'ID de l'enregistrement à supprimer. | Aucun. |
+| `get_record(self, table_class, record_id)` | Récupère un enregistrement d'une table. | `table_class`: La classe de la table contenant l'enregistrement. `record_id`: L'ID de l'enregistrement à récupérer. | L'enregistrement récupéré, ou `None` si aucun enregistrement avec cet ID n'existe. |
+| `search_records(self, table_class, **kwargs)` | Recherche des enregistrements dans une table qui correspondent aux arguments de mot-clé fournis. | `table_class`: La classe de la table dans laquelle rechercher. `**kwargs`: Les critères de recherche. | Une liste d'enregistrements correspondant aux critères de recherche. |
+
 
 
 ### **Configuration**

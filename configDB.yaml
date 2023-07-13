@@ -51,6 +51,13 @@ tables:
         type: 'Integer'
       - name: 'URLAnnonce'
         type: 'String'
+        unique: true
+      - name: 'Images'
+        type: 'String'
+      - name: 'Etat'
+        type: 'String'
+        default: 'New'
+        
   - name: 'Villes'
     columns:
       - name: 'ID'

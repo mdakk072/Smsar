@@ -30,7 +30,49 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from lxml import html
-import  lxml.etree. import tostring
+from  lxml.etree import tostring
+
+
+class PageInteractor:
+    def __init__(self, driver):
+        self.driver = driver
+
+    def click_element(self, by_method, value):
+        try:
+            element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((by_method, value)))
+            element.click()
+        except TimeoutException:
+            print("TimeoutException: Timed out waiting for element to be clickable.")
+        except NoSuchElementException:
+            print(f"No such element found with {by_method} '{value}'.")
+        except Exception as error:
+            print(f"An error occurred during clicking on the element: {str(error)}")
+
+    def enter_text(self, by_method, value, text):
+        try:
+            element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((by_method, value)))
+            element.clear()
+            element.send_keys(text)
+        except TimeoutException:
+            print("TimeoutException: Timed out waiting for element to be present.")
+        except NoSuchElementException:
+            print(f"No such element found with {by_method} '{value}'.")
+        except Exception as error:
+            print(f"An error occurred during entering text: {str(error)}")
+
+    def scroll_to_element(self, by_method, value):
+        try:
+            element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((by_method, value)))
+            self.driver.execute_script("arguments[0].scrollIntoView();", element)
+        except TimeoutException:
+            print("TimeoutException: Timed out waiting for element to be present.")
+        except NoSuchElementException:
+            print(f"No such element found with {by_method} '{value}'.")
+        except Exception as error:
+            print(f"An error occurred during scrolling: {str(error)}")
+
+
+
 class Scraper:
     """A web scraper class."""
 
@@ -62,7 +104,9 @@ class Scraper:
                 for key, value in parameters.items():
                     print(f"        {key}: {value}")
             print("----------------------")
-        self.init_driver()
+        self.step_results = {}  # Store results of each step
+
+        #self.init_driver()
 
     def init_driver(self):
         """
@@ -77,7 +121,59 @@ class Scraper:
         script = "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
         self.driver.execute_script(script)
         self.driver.delete_all_cookies()
+        self.driver.get(url='https://www.google.com/')
         time.sleep(1.5)
+    
+    def get_nested_data(self, data, navigation_params):
+        """Recursively navigate through nested data using provided navigation parameters.
+
+        Parameters:
+        data (any): The data to navigate (can be a dict, a list, or an object).
+        navigation_params (list): The navigation parameters (type and name/index/key).
+
+        Returns:
+        The extracted data.
+        """
+
+        navigation_operations = {
+            'key': lambda data, key: data.get(key),
+            'index': lambda data, key: data[int(key)],
+            'attr': lambda data, key: getattr(data, key, None)
+        }
+
+        if navigation_params:
+       
+            navigation_type, navigation_key = navigation_params.pop(0)
+            data = navigation_operations[navigation_type](data, navigation_key)
+            if data is None:
+                raise ValueError(f'Navigation failed. Could not find {navigation_key} in data.')
+            return self.get_nested_data(data, navigation_params)
+
+        return data
+
+    def get_data(self, **kwargs):
+        """Get data from a specific source using navigation parameters.
+
+        Parameters:
+        kwargs (dict): The parameters with the source and the navigation parameters.
+
+        Returns:
+        The extracted data.
+        """
+        # Get source
+        source = getattr(self, kwargs['source'], None)
+        if source is None:
+            raise ValueError(f"Invalid source: {kwargs['source']}")
+
+        # Get navigation parameters
+        navigation_params = kwargs['get']
+
+        # Return the desired data
+        print(source)
+        print(navigation_params)
+        print(source)
+        input()
+        return self.get_nested_data(source, navigation_params)
 
     def scrap_page(self, by_method, value):
         """
@@ -109,6 +205,7 @@ class Scraper:
         except Exception as error:
             print(f"An error occurred during scraping: {str(error)}")
             return None
+
     def extract_data(self, raw_data, selectors):
         """
         Extract data from the raw HTML using the provided selectors.
@@ -256,18 +353,28 @@ class Scraper:
         self.driver.get(link)
         time.sleep(5)
 
-    def call_api(self, api_url):
+    def call_api(self, api_url, **kwargs):
         """
         Make a GET request to the specified API URL.
 
         Args:
             api_url (str): The URL of the API.
+            **kwargs: Optional parameters for the GET request.
 
         Returns:
             dict: The JSON response.
         """
-        response = requests.get(api_url,timeout=5)
-        return response.json()
+        params = kwargs.get('params', None)
+        headers = kwargs.get('headers', None)
+        timeout = kwargs.get('timeout', 15)
+
+        try:
+            response = requests.get(api_url, params=params, headers=headers, timeout=timeout)
+            response.raise_for_status()  # Raise an exception for non-200 status codes
+            return response.json()
+        except requests.exceptions.RequestException as error:
+            print(f"An error occurred during API request: {str(error)}")
+            return None
 
     def send_data(self, data, address):
         """
@@ -317,6 +424,8 @@ class Scraper:
             method_name = step['method']
             parameters = {}
             # Replace placeholders in parameters with previous result, if applicable
+            print(type(previous_result))
+            
             for key, value in step.get('parameters', {}).items():
                 if isinstance(value, str) and value == "{previous_result}":
                     parameters[key] = previous_result
@@ -326,13 +435,16 @@ class Scraper:
             # Execute the method with the provided parameters
             method = getattr(self, method_name)
             result = method(**parameters)
-            # Get the next state
+            self.step_results[state] = result
+            print(result)
+            input(f">End of step {state}")            # Get the next state
             state = step['next_state']
             if callable(state):
                 state = state(result)
             # Update the previous result for next iteration
             previous_result = result
 
-scraper = Scraper('configWololo.yaml')
+#scraper = Scraper('configWololo.yaml')
 #scraper = Scraper('configAvito.yaml')
+scraper = Scraper('configAvito2.yaml')
 scraper.scrape_site()
